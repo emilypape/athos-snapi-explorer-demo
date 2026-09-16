@@ -420,11 +420,13 @@ body {
 			}
 		}
 
+		// Not a flex item in its own right - its children become direct flex
+		// children of `.heading` itself (which already has its own gap/wrap),
+		// so the toggle button sits right next to the response label and only
+		// the longer bits (the legend text) wrap onto their own line, instead
+		// of the whole group wrapping below the label as one block.
 		.rawControls {
-			display: flex;
-			align-items: center;
-			margin: 0 15px 9px;
-			gap: 10px;
+			display: contents;
 
 			.rawToggle {
 				font-size: 10px;
