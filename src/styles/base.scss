@@ -414,12 +414,14 @@ body {
 			}
 		}
 
-		// Not a flex item in its own right - its children become direct flex
-		// children of `.heading` itself (which already has its own gap/wrap),
-		// so the toggle button and peek icon sit right next to the response
-		// label instead of the whole group wrapping below it as one block.
+		// Its own row above `.heading.lefty` (the response label), same
+		// pattern as `.presetsRow` - never competes with or crowds the label.
 		.rawControls {
-			display: contents;
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			gap: 10px;
+			margin-bottom: 9px;
 
 			.rawToggle {
 				font-size: 10px;

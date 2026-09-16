@@ -775,6 +775,32 @@ export class App extends Component {
 					<div class={`column ${this.state.ready ? '' : 'disabled'}`}>
 						<div class="column-wrap">
 							<div class={`block large ${this.state.expandedResponse && this.state.expandedResponse != 'search' ? 'collapse' : ''}`}>
+								<div class="rawControls">
+									<span
+										class={`rawToggle ${this.state.showRawResponse ? 'active' : ''}`}
+										onClick={() => {
+											this.setState({ showRawResponse: !this.state.showRawResponse });
+										}}
+									>
+										{this.state.showRawResponse ? 'Show Transformed Response' : 'Show Raw Response'}
+									</span>
+
+									{!this.state.showRawResponse && (
+										<span
+											class="rawPeek"
+											title="Hold to peek at the raw response"
+											onMouseEnter={() => {
+												this.setState({ peekRaw: true });
+											}}
+											onMouseLeave={() => {
+												this.setState({ peekRaw: false });
+											}}
+										>
+											👁
+										</span>
+									)}
+								</div>
+
 								<div class="heading lefty">
 									<h5
 										class="clickable center"
@@ -785,33 +811,6 @@ export class App extends Component {
 										{this.state.selectedApi} response
 										<div class={`toggle ${this.state.expandedResponse == 'search' ? 'collapse' : 'expand'}`}></div>
 									</h5>
-
-									<div class="rawControls">
-										<span
-											class={`rawToggle ${this.state.showRawResponse ? 'active' : ''}`}
-											onClick={() => {
-												this.setState({ showRawResponse: !this.state.showRawResponse });
-											}}
-										>
-											{this.state.showRawResponse ? 'Show Transformed Response' : 'Show Raw Response'}
-										</span>
-
-										{!this.state.showRawResponse && (
-											<span
-												class="rawPeek"
-												title="Hold to peek at the raw response"
-												onMouseEnter={() => {
-													this.setState({ peekRaw: true });
-												}}
-												onMouseLeave={() => {
-													this.setState({ peekRaw: false });
-												}}
-											>
-												👁
-											</span>
-										)}
-
-									</div>
 
 									<div class="grow-right">
 										<pre>
