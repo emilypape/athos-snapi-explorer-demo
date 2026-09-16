@@ -147,11 +147,15 @@ export const facetExcludePresets = {
 // term. Kept separate from filterPresets rather than baked into each filter
 // chip: filters are meant to combine freely, so if every filter preset also
 // set the query, whichever was clicked last would silently overwrite it.
-// "tops" verified live to never return 0 results alone or paired with any
-// combination of the category/price presets here, including against the
-// globals vendor background filter, and works through client.autocomplete()
-// too. (A paired subQuery of "hoodie" was tried here too, but broke in
-// practice - removed; query-only is simpler and verified safe.)
+// Different terms for search vs. autocomplete (deliberately NOT shared here):
+// "tops" is fine for search results but never populates the autocomplete-only
+// `suggested`/`alternatives` fields - verified live that no product NAME in
+// this catalog literally contains "top"/"tops" (results match via category/
+// tags instead), so the name-based suggest completion has nothing to
+// complete. "hoodie" populates both (`suggested: {text:"hoodie", type:
+// "exact"}`, `alternatives: [{text:"hoodies"}]`) and is verified safe (never
+// 0 results) alone or paired with every filter/price/sort preset here,
+// including against the globals vendor background filter.
 export const queryPresets = {
 	searchRequest: [
 		{
@@ -161,8 +165,16 @@ export const queryPresets = {
 			value: 'tops',
 		},
 	],
+	autocompleteRequest: [
+		{
+			id: 'query-hoodie',
+			label: 'Query: "hoodie"',
+			description:
+				'Sets the search query to "hoodie" - unlike "tops", this populates both suggested and alternatives (autocomplete-only fields). Verified safe (never 0 results) alone or paired with every filter/price/sort preset here.',
+			value: 'hoodie',
+		},
+	],
 };
-queryPresets.autocompleteRequest = queryPresets.searchRequest;
 
 // Toggleable sort preset - sets/clears `sorts` to a known-good field+
 // direction. Verified live: price-ascending genuinely sorts results (spot-
