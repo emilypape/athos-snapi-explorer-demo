@@ -103,26 +103,11 @@ export const filterPresets = {
 	],
 	searchRequest: [
 		{
-			id: 'bg-inventory-deny',
-			group: 'inventory_policy',
-			label: 'Background filter',
-			description:
-				'Silently excludes items with a "deny" inventory policy via a background filter (127 results drop to 23) without it showing up as an active facet.',
-			filter: { field: 'inventory_policy', type: 'value', value: 'deny', background: true },
-		},
-		{
 			id: 'cat-sweatshirts',
 			group: 'tags_category',
 			label: 'Category: Sweatshirts',
 			description: 'Filters to the Sweatshirts product type (23 results alone).',
 			filter: { field: 'tags_category', type: 'value', value: 'Sweatshirts' },
-		},
-		{
-			id: 'cat-leggings',
-			group: 'tags_category',
-			label: 'Category: Leggings',
-			description: 'Filters to the Leggings product type (10 results alone).',
-			filter: { field: 'tags_category', type: 'value', value: 'Leggings' },
 		},
 		{
 			id: 'price-20-100',
@@ -158,27 +143,46 @@ export const facetExcludePresets = {
 	],
 };
 
-// Toggleable query preset - sets/clears search.query.string to a known-good
-// term. Kept separate from filterPresets rather than baked into each filter
-// chip: filters are meant to combine freely, so if every filter preset also
-// set the query, whichever was clicked last would silently overwrite it.
-// "wear" verified live to never return 0 results alone or paired with any
-// combination of the filter/background-filter/price presets here, including
-// against the globals vendor background filter - and works through
-// client.autocomplete() too (autocomplete requires a non-empty query, so this
-// also lets a bare filter chip run standalone on that tab).
+// Toggleable query preset - sets/clears search.query.string (and a paired
+// subQuery) to a known-good term. Kept separate from filterPresets rather
+// than baked into each filter chip: filters are meant to combine freely, so
+// if every filter preset also set the query, whichever was clicked last
+// would silently overwrite it. query "tops" + subQuery "hoodie" (subQuery is
+// the "rq" refinement-query param, used to narrow within the main query -
+// see docs/Libraries/library-snap-client.md) verified live to never return 0
+// results alone or paired with any combination of the category/price
+// presets here, including against the globals vendor background filter -
+// and works through client.autocomplete() too.
 export const queryPresets = {
 	searchRequest: [
 		{
-			id: 'query-wear',
-			label: 'Query: "wear"',
+			id: 'query-tops',
+			label: 'Query: "tops"',
 			description:
-				'Sets the search query to "wear" - verified safe (never 0 results) alone or paired with every filter/background-filter/price preset here.',
-			value: 'wear',
+				'Sets the search query to "tops" with a paired subQuery of "hoodie" (refining within tops) - verified safe (never 0 results) alone or paired with every filter/price preset here.',
+			value: 'tops',
+			subQuery: 'hoodie',
 		},
 	],
 };
 queryPresets.autocompleteRequest = queryPresets.searchRequest;
+
+// Toggleable sort preset - sets/clears `sorts` to a known-good field+
+// direction. Verified live: price-ascending genuinely sorts results (spot-
+// checked increasing prices) and never returns 0 results (sorting doesn't
+// change result count, only order) - confirmed alone and combined with the
+// category/price/query presets and the globals vendor filter.
+export const sortPresets = {
+	searchRequest: [
+		{
+			id: 'sort-price-asc',
+			label: 'Sort: Price low–high',
+			description: 'Sorts results by price ascending - verified this genuinely reorders results and never affects result count.',
+			value: { field: 'price', direction: 'asc' },
+		},
+	],
+};
+sortPresets.autocompleteRequest = sortPresets.searchRequest;
 
 // Non-filter globals presets - these patch/remove a whole top-level key on
 // `globals` rather than toggling one entry in a `filters` array. Verified:

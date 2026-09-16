@@ -396,6 +396,22 @@ body {
 					}
 				}
 
+				&.sort {
+					border-style: solid;
+					border-width: 2px;
+					border-color: #1abc9c;
+					color: #1abc9c;
+
+					&:hover {
+						background-color: color.adjust(#1abc9c, $lightness: 48%);
+					}
+
+					&.active {
+						background-color: #1abc9c;
+						color: #fff;
+					}
+				}
+
 				&:disabled {
 					opacity: 0.4;
 					cursor: not-allowed;

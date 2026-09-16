@@ -3,7 +3,7 @@ import { Client } from '@athoscommerce/snap-client';
 import { Header } from './Header.js';
 import { ApiSelector } from './ApiSelector';
 import { Ace } from './Ace.js';
-import { defaults, presets, filterPresets, globalsPresets, facetExcludePresets, queryPresets, transformedNewKeys } from '../defaults.js';
+import { defaults, presets, filterPresets, globalsPresets, facetExcludePresets, queryPresets, sortPresets, transformedNewKeys } from '../defaults.js';
 
 window.Client = Client;
 const storageKey = 'athosSnapiDemoStorage';
@@ -318,7 +318,40 @@ export class App extends Component {
 
 		current.search = current.search || {};
 		current.search.query = current.search.query || {};
-		current.search.query.string = current.search.query.string === preset.value ? '' : preset.value;
+
+		const activating = current.search.query.string !== preset.value;
+
+		current.search.query.string = activating ? preset.value : '';
+		current.search.subQuery = activating ? preset.subQuery || '' : '';
+
+		this.applyPreset(key, current);
+	};
+
+	// Toggleable sort preset - sets/clears `sorts` to a single {field,
+	// direction} entry.
+	isSortPresetActive = (preset) => {
+		let current = {};
+
+		try {
+			current = JSON.parse(this.state[`${this.state.selectedApi}Request`] || '{}');
+		} catch (err) {
+			current = {};
+		}
+
+		return Array.isArray(current.sorts) && current.sorts.length === 1 && JSON.stringify(current.sorts[0]) === JSON.stringify(preset.value);
+	};
+
+	toggleSortPreset = (preset) => {
+		const key = `${this.state.selectedApi}Request`;
+		let current = {};
+
+		try {
+			current = JSON.parse(this.state[key] || '{}');
+		} catch (err) {
+			current = {};
+		}
+
+		current.sorts = this.isSortPresetActive(preset) ? [] : [preset.value];
 
 		this.applyPreset(key, current);
 	};
@@ -486,6 +519,7 @@ export class App extends Component {
 		const currentFilterPresets = filterPresets[`${this.state.selectedApi}Request`];
 		const currentFacetExcludePresets = facetExcludePresets[`${this.state.selectedApi}Request`];
 		const currentQueryPresets = queryPresets[`${this.state.selectedApi}Request`];
+		const currentSortPresets = sortPresets[`${this.state.selectedApi}Request`];
 
 		return (
 			<div class="App">
@@ -623,7 +657,12 @@ export class App extends Component {
 											{this.state[`${this.state.selectedApi}Request`] == defaults[`${this.state.selectedApi}Request`] ? '' : 'reset'}
 										</div>
 
-										{(currentQueryPresets || currentFilterPresets || currentFacetExcludePresets || currentPresets || this.state.selectedApi === 'recommend') && (
+										{(currentQueryPresets ||
+											currentSortPresets ||
+											currentFilterPresets ||
+											currentFacetExcludePresets ||
+											currentPresets ||
+											this.state.selectedApi === 'recommend') && (
 											<div class="presets">
 												{currentQueryPresets &&
 													currentQueryPresets.map((preset) => (
@@ -633,6 +672,20 @@ export class App extends Component {
 															title={preset.description}
 															onClick={() => {
 																this.toggleQueryPreset(preset);
+															}}
+														>
+															{preset.label}
+														</button>
+													))}
+
+												{currentSortPresets &&
+													currentSortPresets.map((preset) => (
+														<button
+															type="button"
+															class={`preset sort ${this.isSortPresetActive(preset) ? 'active' : ''}`}
+															title={preset.description}
+															onClick={() => {
+																this.toggleSortPreset(preset);
 															}}
 														>
 															{preset.label}
