@@ -118,13 +118,6 @@ export const filterPresets = {
 			filter: { field: 'tags_category', type: 'value', value: 'Sweatshirts' },
 		},
 		{
-			id: 'cat-joggers',
-			group: 'tags_category',
-			label: 'Category: Joggers',
-			description: 'Filters to the Joggers product type (11 results alone).',
-			filter: { field: 'tags_category', type: 'value', value: 'Joggers' },
-		},
-		{
 			id: 'cat-leggings',
 			group: 'tags_category',
 			label: 'Category: Leggings',
@@ -152,21 +145,15 @@ filterPresets.autocompleteRequest = filterPresets.searchRequest;
 // Toggleable `facets.exclude` presets - adds/removes a facet from the ones
 // the API even bothers returning, distinct from filtering: results/count are
 // completely unaffected, only which facets come back. Verified live:
-// excluding "color" and "vendor" removes them from `search.facets` while
+// excluding "collection_name" removes it from `search.facets` while
 // totalResults stays at 127 either way.
 export const facetExcludePresets = {
 	searchRequest: [
 		{
-			id: 'exclude-color',
-			label: 'Exclude facet: Color',
-			description: 'Adds "color" to facets.exclude - it’s omitted from the response entirely (not just hidden/collapsed); results are unaffected.',
-			value: 'color',
-		},
-		{
-			id: 'exclude-vendor',
-			label: 'Exclude facet: Vendor',
-			description: 'Adds "vendor" to facets.exclude - useful for hiding a facet from nav/merchandising without touching filtering; results are unaffected.',
-			value: 'vendor',
+			id: 'exclude-collection-name',
+			label: 'Exclude facet: collection_name',
+			description: 'Adds "collection_name" to facets.exclude - it’s omitted from the response entirely (not just hidden/collapsed); results are unaffected.',
+			value: 'collection_name',
 		},
 	],
 };
