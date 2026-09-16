@@ -221,6 +221,7 @@ body {
 			justify-content: flex-start;
 			align-items: flex-end;
 			flex-wrap: wrap;
+			gap: 8px 15px;
 			&.lefty {
 				justify-content: left;
 			}
@@ -288,23 +289,22 @@ body {
 			}
 		}
 
-		// Groups "reset" and the preset buttons into one flex unit that sits
-		// inline in the (wrapping) `.heading` row, right after the label/api
-		// dropdown - so presets flow in a row next to reset, and only wrap
-		// among themselves (never sharing a wrapped line with the dropdown).
+		// Not a flex item in its own right - "reset" and the preset buttons
+		// become direct children of `.heading`'s own flex-wrap row instead, so
+		// they flow beside the api dropdown itself, and only the overflow
+		// (whichever buttons don't fit) wraps to the next line - rather than
+		// the whole reset+presets group wrapping below the dropdown as one
+		// block.
 		.resetAndPresets {
-			display: flex;
-			align-items: center;
-			flex-wrap: wrap;
-			gap: 8px 15px;
-			margin-bottom: 9px;
+			display: contents;
 		}
 
 		.presets {
-			// Not a flex item in its own right - its buttons become direct
-			// flex children of `.resetAndPresets` instead, so they wrap
-			// individually right alongside "reset" rather than the whole
-			// preset group wrapping as one block below it.
+			// Not a flex item in its own right - combined with `.resetAndPresets`
+			// also being `display: contents`, its buttons end up as direct flex
+			// children of `.heading` itself, alongside the api dropdown and
+			// "reset" - so they wrap individually beside the dropdown rather
+			// than as one block below it.
 			display: contents;
 
 			.preset {
