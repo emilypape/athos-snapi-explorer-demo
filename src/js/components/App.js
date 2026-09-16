@@ -318,11 +318,7 @@ export class App extends Component {
 
 		current.search = current.search || {};
 		current.search.query = current.search.query || {};
-
-		const activating = current.search.query.string !== preset.value;
-
-		current.search.query.string = activating ? preset.value : '';
-		current.search.subQuery = activating ? preset.subQuery || '' : '';
+		current.search.query.string = current.search.query.string === preset.value ? '' : preset.value;
 
 		this.applyPreset(key, current);
 	};

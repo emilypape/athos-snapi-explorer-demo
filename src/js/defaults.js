@@ -143,25 +143,22 @@ export const facetExcludePresets = {
 	],
 };
 
-// Toggleable query preset - sets/clears search.query.string (and a paired
-// subQuery) to a known-good term. Kept separate from filterPresets rather
-// than baked into each filter chip: filters are meant to combine freely, so
-// if every filter preset also set the query, whichever was clicked last
-// would silently overwrite it. query "tops" + subQuery "hoodie" (subQuery is
-// the "rq" refinement-query param, used to narrow within the main query -
-// see docs/Libraries/library-snap-client.md) verified live to never return 0
-// results alone or paired with any combination of the category/price
-// presets here, including against the globals vendor background filter -
-// and works through client.autocomplete() too.
+// Toggleable query preset - sets/clears search.query.string to a known-good
+// term. Kept separate from filterPresets rather than baked into each filter
+// chip: filters are meant to combine freely, so if every filter preset also
+// set the query, whichever was clicked last would silently overwrite it.
+// "tops" verified live to never return 0 results alone or paired with any
+// combination of the category/price presets here, including against the
+// globals vendor background filter, and works through client.autocomplete()
+// too. (A paired subQuery of "hoodie" was tried here too, but broke in
+// practice - removed; query-only is simpler and verified safe.)
 export const queryPresets = {
 	searchRequest: [
 		{
 			id: 'query-tops',
 			label: 'Query: "tops"',
-			description:
-				'Sets the search query to "tops" with a paired subQuery of "hoodie" (refining within tops) - verified safe (never 0 results) alone or paired with every filter/price preset here.',
+			description: 'Sets the search query to "tops" - verified safe (never 0 results) alone or paired with every filter/price preset here.',
 			value: 'tops',
-			subQuery: 'hoodie',
 		},
 	],
 };
