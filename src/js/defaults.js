@@ -158,6 +158,28 @@ export const facetExcludePresets = {
 	],
 };
 
+// Toggleable query preset - sets/clears search.query.string to a known-good
+// term. Kept separate from filterPresets rather than baked into each filter
+// chip: filters are meant to combine freely, so if every filter preset also
+// set the query, whichever was clicked last would silently overwrite it.
+// "wear" verified live to never return 0 results alone or paired with any
+// combination of the filter/background-filter/price presets here, including
+// against the globals vendor background filter - and works through
+// client.autocomplete() too (autocomplete requires a non-empty query, so this
+// also lets a bare filter chip run standalone on that tab).
+export const queryPresets = {
+	searchRequest: [
+		{
+			id: 'query-wear',
+			label: 'Query: "wear"',
+			description:
+				'Sets the search query to "wear" - verified safe (never 0 results) alone or paired with every filter/background-filter/price preset here.',
+			value: 'wear',
+		},
+	],
+};
+queryPresets.autocompleteRequest = queryPresets.searchRequest;
+
 // Non-filter globals presets - these patch/remove a whole top-level key on
 // `globals` rather than toggling one entry in a `filters` array. Verified:
 // a request's OWN `pagination` always wins over the global default (that's

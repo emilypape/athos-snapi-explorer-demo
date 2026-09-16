@@ -380,6 +380,22 @@ body {
 					}
 				}
 
+				&.query {
+					border-style: solid;
+					border-width: 2px;
+					border-color: $athosBlue;
+					color: $athosBlue;
+
+					&:hover {
+						background-color: color.adjust($athosBlue, $lightness: 55%);
+					}
+
+					&.active {
+						background-color: $athosBlue;
+						color: #fff;
+					}
+				}
+
 				&:disabled {
 					opacity: 0.4;
 					cursor: not-allowed;

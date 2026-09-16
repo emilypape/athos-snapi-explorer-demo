@@ -3,7 +3,7 @@ import { Client } from '@athoscommerce/snap-client';
 import { Header } from './Header.js';
 import { ApiSelector } from './ApiSelector';
 import { Ace } from './Ace.js';
-import { defaults, presets, filterPresets, globalsPresets, facetExcludePresets, transformedNewKeys } from '../defaults.js';
+import { defaults, presets, filterPresets, globalsPresets, facetExcludePresets, queryPresets, transformedNewKeys } from '../defaults.js';
 
 window.Client = Client;
 const storageKey = 'athosSnapiDemoStorage';
@@ -27,7 +27,9 @@ export class App extends Component {
 			showRawResponse: false,
 			peekRaw: false,
 			lastSearchResults: [],
-			expandedResponse: undefined,
+			// Response panel starts fully expanded, meta data panel starts
+			// collapsed - meta is the less interesting panel for a live demo.
+			expandedResponse: 'search',
 			globalsCollapse: false,
 			globals: defaults.globals,
 			instantiatedGlobals: undefined,
@@ -288,6 +290,39 @@ export class App extends Component {
 		this.applyPreset(key, current);
 	};
 
+	// Toggleable query preset - sets/clears search.query.string. Separate from
+	// the filter presets since query is a single value, not something to add
+	// to a list - toggling sets it if not already active, or clears it back
+	// to '' if clicking the already-active one.
+	isQueryPresetActive = (preset) => {
+		let current = {};
+
+		try {
+			current = JSON.parse(this.state[`${this.state.selectedApi}Request`] || '{}');
+		} catch (err) {
+			current = {};
+		}
+
+		return current.search?.query?.string === preset.value;
+	};
+
+	toggleQueryPreset = (preset) => {
+		const key = `${this.state.selectedApi}Request`;
+		let current = {};
+
+		try {
+			current = JSON.parse(this.state[key] || '{}');
+		} catch (err) {
+			current = {};
+		}
+
+		current.search = current.search || {};
+		current.search.query = current.search.query || {};
+		current.search.query.string = current.search.query.string === preset.value ? '' : preset.value;
+
+		this.applyPreset(key, current);
+	};
+
 	isGlobalsFilterPresetActive = (preset) => this.isFilterPresetActiveIn('globals', preset);
 	toggleGlobalsFilterPreset = (preset) => this.toggleFilterPresetIn('globals', preset, { reinstantiate: true });
 
@@ -450,6 +485,7 @@ export class App extends Component {
 		const currentPresets = presets[`${this.state.selectedApi}Request`];
 		const currentFilterPresets = filterPresets[`${this.state.selectedApi}Request`];
 		const currentFacetExcludePresets = facetExcludePresets[`${this.state.selectedApi}Request`];
+		const currentQueryPresets = queryPresets[`${this.state.selectedApi}Request`];
 
 		return (
 			<div class="App">
@@ -587,8 +623,22 @@ export class App extends Component {
 											{this.state[`${this.state.selectedApi}Request`] == defaults[`${this.state.selectedApi}Request`] ? '' : 'reset'}
 										</div>
 
-										{(currentFilterPresets || currentFacetExcludePresets || currentPresets || this.state.selectedApi === 'recommend') && (
+										{(currentQueryPresets || currentFilterPresets || currentFacetExcludePresets || currentPresets || this.state.selectedApi === 'recommend') && (
 											<div class="presets">
+												{currentQueryPresets &&
+													currentQueryPresets.map((preset) => (
+														<button
+															type="button"
+															class={`preset query ${this.isQueryPresetActive(preset) ? 'active' : ''}`}
+															title={preset.description}
+															onClick={() => {
+																this.toggleQueryPreset(preset);
+															}}
+														>
+															{preset.label}
+														</button>
+													))}
+
 												{currentFilterPresets &&
 													currentFilterPresets.map((preset) => (
 														<button
