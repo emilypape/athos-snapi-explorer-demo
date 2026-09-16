@@ -92,28 +92,63 @@ export class Ace extends Component {
 		});
 	};
 
+	// Jumps the editor's scroll position straight to the top or bottom -
+	// useful on a response that's thousands of lines long (30 full results).
+	scrollTo = (where) => {
+		if (!this.editor) {
+			return;
+		}
+
+		this.editor.session.setScrollTop(where === 'top' ? 0 : Number.MAX_SAFE_INTEGER);
+	};
+
 	render() {
 		return (
-			<AceEditor
-				placeholder=""
-				mode="json"
-				theme={this.props.dark ? 'tomorrow_night' : 'textmate'}
-				onChange={this.props.onChange}
-				onLoad={this.onLoad}
-				readOnly={this.props.readOnly}
-				fontSize={12}
-				width={'100%'}
-				height={'100%'}
-				showPrintMargin={false}
-				showGutter={true}
-				showFoldWidgets={true}
-				highlightActiveLine={true}
-				defaultValue=""
-				value={this.props.value}
-				setOptions={{
-					tabSize: 2,
-				}}
-			/>
+			<div class="aceWrap">
+				<AceEditor
+					placeholder=""
+					mode="json"
+					theme={this.props.dark ? 'tomorrow_night' : 'textmate'}
+					onChange={this.props.onChange}
+					onLoad={this.onLoad}
+					readOnly={this.props.readOnly}
+					fontSize={12}
+					width={'100%'}
+					height={'100%'}
+					showPrintMargin={false}
+					showGutter={true}
+					showFoldWidgets={true}
+					highlightActiveLine={true}
+					defaultValue=""
+					value={this.props.value}
+					setOptions={{
+						tabSize: 2,
+					}}
+				/>
+
+				{this.props.scrollButtons && (
+					<div class="aceScrollButtons">
+						<button
+							type="button"
+							title="Scroll to top"
+							onClick={() => {
+								this.scrollTo('top');
+							}}
+						>
+							&uarr;
+						</button>
+						<button
+							type="button"
+							title="Scroll to bottom"
+							onClick={() => {
+								this.scrollTo('bottom');
+							}}
+						>
+							&darr;
+						</button>
+					</div>
+				)}
+			</div>
 		);
 	}
 }

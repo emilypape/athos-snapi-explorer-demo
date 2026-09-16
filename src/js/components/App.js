@@ -839,6 +839,7 @@ export class App extends Component {
 										dark={this.state.showRawResponse}
 										autoFoldExcept={['results']}
 										highlightKeyNames={!this.state.showRawResponse ? transformedNewKeys : null}
+										scrollButtons={true}
 									/>
 
 									{this.state.peekRaw && !this.state.showRawResponse && (
@@ -870,6 +871,7 @@ export class App extends Component {
 										value={this.state.showRawResponse ? this.state.rawMeta : this.state.meta}
 										readOnly={true}
 										dark={this.state.showRawResponse}
+										scrollButtons={true}
 									/>
 								</div>
 							</div>
