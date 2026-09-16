@@ -424,6 +424,21 @@ body {
 					filter: none;
 				}
 			}
+
+			.rawLegend {
+				font-size: 10px;
+				color: $gray;
+
+				.rawLegendSwatch {
+					display: inline-block;
+					width: 10px;
+					height: 10px;
+					margin-right: 5px;
+					vertical-align: middle;
+					background-color: rgba(46, 204, 113, 0.45);
+					border-left: 3px solid #2ecc71;
+				}
+			}
 		}
 
 		.footing {
@@ -503,6 +518,16 @@ body {
 
 			&.dark {
 				border-color: #1d1f21;
+			}
+
+			// Highlights a raw-response top-level line whose key survives into
+			// the transformed response (see rawToTransformedKeyMap). Ace
+			// positions fullLine markers absolutely already; this just adds the
+			// tint on top of whichever theme (light/dark) is active.
+			.rawSurvives {
+				position: absolute;
+				background-color: rgba(46, 204, 113, 0.25);
+				border-left: 3px solid #2ecc71;
 			}
 
 			.rawPeekOverlay {

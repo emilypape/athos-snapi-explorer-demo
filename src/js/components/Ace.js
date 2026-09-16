@@ -12,9 +12,12 @@ import 'ace-builds/src-noconflict/theme-tomorrow_night';
 export class Ace extends Component {
 	editor = null;
 
+	highlightMarkerIds = [];
+
 	onLoad = (editor) => {
 		this.editor = editor;
 		this.applyAutoFold();
+		this.applyHighlightKeys();
 	};
 
 	componentDidUpdate(prevProps) {
@@ -22,6 +25,10 @@ export class Ace extends Component {
 
 		if (this.props.value !== prevProps.value) {
 			this.applyAutoFold();
+		}
+
+		if (this.props.value !== prevProps.value || this.props.highlightKeys !== prevProps.highlightKeys) {
+			this.applyHighlightKeys();
 		}
 	}
 
@@ -49,6 +56,39 @@ export class Ace extends Component {
 				if (range) {
 					session.addFold('...', range);
 				}
+			}
+		});
+	};
+
+	// When `highlightKeys` is set (a map of raw key -> transformed key name),
+	// highlights each top-level line whose key is a map key - i.e. the raw
+	// fields that actually survive into the transformed response. Anything
+	// NOT highlighted at the top level (e.g. `breadcrumbs`, `features` in a
+	// real search response) is silently dropped by the transform - that
+	// contrast is the point.
+	applyHighlightKeys = () => {
+		if (!this.editor) {
+			return;
+		}
+
+		const session = this.editor.getSession();
+
+		this.highlightMarkerIds.forEach((id) => session.removeMarker(id));
+		this.highlightMarkerIds = [];
+
+		if (!this.props.highlightKeys) {
+			return;
+		}
+
+		const { Range } = ace.require('ace/range');
+		const lines = (this.props.value || '').split('\n');
+
+		lines.forEach((line, row) => {
+			const match = line.match(/^ {2}"([^"]+)":/);
+
+			if (match && this.props.highlightKeys[match[1]]) {
+				const id = session.addMarker(new Range(row, 0, row, 1), 'rawSurvives', 'fullLine');
+				this.highlightMarkerIds.push(id);
 			}
 		});
 	};
