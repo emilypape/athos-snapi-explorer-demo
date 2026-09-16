@@ -3,7 +3,7 @@ import { Client } from '@athoscommerce/snap-client';
 import { Header } from './Header.js';
 import { ApiSelector } from './ApiSelector';
 import { Ace } from './Ace.js';
-import { defaults, presets, filterPresets, globalsPresets, facetExcludePresets, rawToTransformedKeyMap, transformedNewKeys } from '../defaults.js';
+import { defaults, presets, filterPresets, globalsPresets, facetExcludePresets, transformedNewKeys } from '../defaults.js';
 
 window.Client = Client;
 const storageKey = 'athosSnapiDemoStorage';
@@ -450,7 +450,6 @@ export class App extends Component {
 		const currentPresets = presets[`${this.state.selectedApi}Request`];
 		const currentFilterPresets = filterPresets[`${this.state.selectedApi}Request`];
 		const currentFacetExcludePresets = facetExcludePresets[`${this.state.selectedApi}Request`];
-		const currentHighlightMap = rawToTransformedKeyMap[this.state.selectedApi];
 
 		return (
 			<div class="App">
@@ -717,16 +716,9 @@ export class App extends Component {
 											</span>
 										)}
 
-										{this.state.showRawResponse && currentHighlightMap && (
-											<span class="rawLegend">
-												<span class="rawLegendSwatch"></span>
-												survives into the transformed response - everything else at the top level is dropped by the transform
-											</span>
-										)}
-
 										{!this.state.showRawResponse && (
 											<span class="rawLegend">
-												<span class="rawLegendSwatch new"></span>
+												<span class="rawLegendSwatch"></span>
 												new structure the transform adds per result (not present anywhere in the raw result)
 											</span>
 										)}
@@ -747,20 +739,13 @@ export class App extends Component {
 										readOnly={true}
 										dark={this.state.showRawResponse}
 										autoFoldExcept={['results']}
-										highlightKeys={this.state.showRawResponse ? currentHighlightMap : null}
 										highlightKeyNames={!this.state.showRawResponse ? transformedNewKeys : null}
 									/>
 
 									{this.state.peekRaw && !this.state.showRawResponse && (
 										<div class="rawPeekOverlay">
 											<div class="rawPeekLabel">raw response</div>
-											<Ace
-												value={this.state.rawResponse}
-												readOnly={true}
-												dark={true}
-												autoFoldExcept={['results']}
-												highlightKeys={currentHighlightMap}
-											/>
+											<Ace value={this.state.rawResponse} readOnly={true} dark={true} autoFoldExcept={['results']} />
 										</div>
 									)}
 								</div>

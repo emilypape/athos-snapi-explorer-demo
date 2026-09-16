@@ -435,13 +435,8 @@ body {
 					height: 10px;
 					margin-right: 5px;
 					vertical-align: middle;
-					background-color: rgba(46, 204, 113, 0.45);
-					border-left: 3px solid #2ecc71;
-
-					&.new {
-						background-color: rgba(155, 89, 182, 0.35);
-						border-left-color: #9b59b6;
-					}
+					background-color: rgba(155, 89, 182, 0.35);
+					border-left: 3px solid #9b59b6;
 				}
 			}
 		}
@@ -525,19 +520,10 @@ body {
 				border-color: #1d1f21;
 			}
 
-			// Highlights a raw-response top-level line whose key survives into
-			// the transformed response (see rawToTransformedKeyMap). Ace
+			// Highlights a TRANSFORMED-response line whose key is structure the
+			// transform newly introduces (mappings/core/attributes). Ace
 			// positions fullLine markers absolutely already; this just adds the
 			// tint on top of whichever theme (light/dark) is active.
-			.rawSurvives {
-				position: absolute;
-				background-color: rgba(46, 204, 113, 0.25);
-				border-left: 3px solid #2ecc71;
-			}
-
-			// Highlights a TRANSFORMED-response line whose key is structure the
-			// transform newly introduces (mappings/core/attributes) - the
-			// counterpart to .rawSurvives, on the other view.
 			.transformNew {
 				position: absolute;
 				background-color: rgba(155, 89, 182, 0.2);

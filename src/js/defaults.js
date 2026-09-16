@@ -203,42 +203,14 @@ export const presets = {
 	],
 };
 
-// Raw (pre-transform) top-level key -> transformed top-level key, taken
-// directly from @athoscommerce/snap-client's transformSearchResponse source
-// (transforms/searchResponse.js), not guessed: pagination/results/facets/
-// sorting/merchandising pass through under the same name; filterSummary
-// becomes `filters`; query + didYouMean both feed `search`; responseId
-// becomes `tracking`. Verified live (search + autocomplete share this same
-// transform) that the raw payload also contains `breadcrumbs` and `features`
-// - neither is referenced anywhere in the transform, so they're silently
-// dropped. Used to highlight, in the raw response view, which raw fields
-// actually survive into the transformed shape.
-export const rawToTransformedKeyMap = {
-	search: {
-		pagination: 'pagination',
-		results: 'results',
-		filterSummary: 'filters',
-		facets: 'facets',
-		sorting: 'sorting',
-		merchandising: 'merchandising',
-		query: 'search',
-		didYouMean: 'search',
-		responseId: 'tracking',
-	},
-};
-// autocomplete's search/results portion goes through the exact same
-// transformSearchResponse - only the separate suggest-API response (merged in
-// afterward as `autocomplete`) isn't covered, since we don't capture its raw
-// payload separately.
-rawToTransformedKeyMap.autocomplete = rawToTransformedKeyMap.search;
-
-// Counterpart to rawToTransformedKeyMap, for the TRANSFORMED view: key names
-// the transform newly introduces per result item, verified live against a
-// real result - the raw result is ~40 flat fields (name, price, vendor,
-// category, ... plus id/uid), and none of them are named "mappings",
+// Key names the transform newly introduces per result item, verified live
+// against a real result - the raw result is ~40 flat fields (name, price,
+// vendor, category, ... plus id/uid), and none of them are named "mappings",
 // "attributes", or "core". The transform buckets the ~20 known/core fields
 // under mappings.core and everything else under attributes - both container
-// keys are pure transform output, not renamed/passthrough raw fields.
-// Recurs once per item in `results`, so highlighting matches by key name at
-// any depth rather than only the true top level.
+// keys are pure transform output, not renamed/passthrough raw fields. Recurs
+// once per item in `results` (and once per variant, since variants go through
+// the same transform), so highlighting matches by key name at any depth
+// rather than only the true top level. Highlighted in the transformed
+// response view to show what the transform adds.
 export const transformedNewKeys = ['mappings', 'attributes', 'core'];

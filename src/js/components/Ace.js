@@ -12,13 +12,11 @@ import 'ace-builds/src-noconflict/theme-tomorrow_night';
 export class Ace extends Component {
 	editor = null;
 
-	highlightMarkerIds = [];
 	newKeyMarkerIds = [];
 
 	onLoad = (editor) => {
 		this.editor = editor;
 		this.applyAutoFold();
-		this.applyHighlightKeys();
 		this.applyHighlightKeyNames();
 	};
 
@@ -27,10 +25,6 @@ export class Ace extends Component {
 
 		if (this.props.value !== prevProps.value) {
 			this.applyAutoFold();
-		}
-
-		if (this.props.value !== prevProps.value || this.props.highlightKeys !== prevProps.highlightKeys) {
-			this.applyHighlightKeys();
 		}
 
 		if (this.props.value !== prevProps.value || this.props.highlightKeyNames !== prevProps.highlightKeyNames) {
@@ -66,45 +60,12 @@ export class Ace extends Component {
 		});
 	};
 
-	// When `highlightKeys` is set (a map of raw key -> transformed key name),
-	// highlights each top-level line whose key is a map key - i.e. the raw
-	// fields that actually survive into the transformed response. Anything
-	// NOT highlighted at the top level (e.g. `breadcrumbs`, `features` in a
-	// real search response) is silently dropped by the transform - that
-	// contrast is the point.
-	applyHighlightKeys = () => {
-		if (!this.editor) {
-			return;
-		}
-
-		const session = this.editor.getSession();
-
-		this.highlightMarkerIds.forEach((id) => session.removeMarker(id));
-		this.highlightMarkerIds = [];
-
-		if (!this.props.highlightKeys) {
-			return;
-		}
-
-		const { Range } = ace.require('ace/range');
-		const lines = (this.props.value || '').split('\n');
-
-		lines.forEach((line, row) => {
-			const match = line.match(/^ {2}"([^"]+)":/);
-
-			if (match && this.props.highlightKeys[match[1]]) {
-				const id = session.addMarker(new Range(row, 0, row, 1), 'rawSurvives', 'fullLine');
-				this.highlightMarkerIds.push(id);
-			}
-		});
-	};
-
 	// When `highlightKeyNames` is set (a plain array of key names), highlights
-	// every line whose key matches, AT ANY DEPTH - unlike `highlightKeys`,
-	// which only looks at the true top level. Used on the TRANSFORMED view to
-	// show structure the transform newly introduces per result (e.g.
-	// `mappings`/`core`/`attributes`, which recur once per item in `results`
-	// and don't exist as keys anywhere in the raw result at all).
+	// every line whose key matches, at any depth (not just the top level).
+	// Used on the TRANSFORMED view to show structure the transform newly
+	// introduces per result (e.g. `mappings`/`core`/`attributes`, which recur
+	// once per item in `results` and don't exist as keys anywhere in the raw
+	// result at all).
 	applyHighlightKeyNames = () => {
 		if (!this.editor) {
 			return;
