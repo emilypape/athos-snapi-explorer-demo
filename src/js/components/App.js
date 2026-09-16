@@ -473,47 +473,49 @@ export class App extends Component {
 										<div class={`toggle ${this.state.globalsCollapse ? 'expand' : 'collapse'}`}></div>
 									</h5>
 
-									<span
-										class="reset"
-										onClick={() => {
-											this.reset('globals');
-										}}
-									>
-										{this.state.globals == defaults.globals ? '' : 'reset'}
-									</span>
+									<div class="resetAndPresets">
+										<span
+											class="reset"
+											onClick={() => {
+												this.reset('globals');
+											}}
+										>
+											{this.state.globals == defaults.globals ? '' : 'reset'}
+										</span>
 
-									{(filterPresets.globals || globalsPresets) && (
-										<div class="presets">
-											{filterPresets.globals.map((preset) => (
-												<button
-													type="button"
-													class={`preset ${preset.filter.background ? 'background' : ''} ${
-														this.isGlobalsFilterPresetActive(preset) ? 'active' : ''
-													}`}
-													title={preset.description}
-													onClick={() => {
-														this.toggleGlobalsFilterPreset(preset);
-													}}
-												>
-													{preset.filter.background && <span class="bgBadge">bg</span>}
-													{preset.label}
-												</button>
-											))}
+										{(filterPresets.globals || globalsPresets) && (
+											<div class="presets">
+												{filterPresets.globals.map((preset) => (
+													<button
+														type="button"
+														class={`preset ${preset.filter.background ? 'background' : ''} ${
+															this.isGlobalsFilterPresetActive(preset) ? 'active' : ''
+														}`}
+														title={preset.description}
+														onClick={() => {
+															this.toggleGlobalsFilterPreset(preset);
+														}}
+													>
+														{preset.filter.background && <span class="bgBadge">bg</span>}
+														{preset.label}
+													</button>
+												))}
 
-											{globalsPresets.map((preset) => (
-												<button
-													type="button"
-													class={`preset ${this.isGlobalsPresetActive(preset) ? 'active' : ''}`}
-													title={preset.description}
-													onClick={() => {
-														this.toggleGlobalsPreset(preset);
-													}}
-												>
-													{preset.label}
-												</button>
-											))}
-										</div>
-									)}
+												{globalsPresets.map((preset) => (
+													<button
+														type="button"
+														class={`preset ${this.isGlobalsPresetActive(preset) ? 'active' : ''}`}
+														title={preset.description}
+														onClick={() => {
+															this.toggleGlobalsPreset(preset);
+														}}
+													>
+														{preset.label}
+													</button>
+												))}
+											</div>
+										)}
+									</div>
 
 									<div class="grow-right">
 										<pre>
@@ -575,76 +577,78 @@ export class App extends Component {
 										/>
 									</div>
 
-									<div
-										class="reset"
-										onClick={() => {
-											this.reset(`${this.state.selectedApi}Request`);
-										}}
-									>
-										{this.state[`${this.state.selectedApi}Request`] == defaults[`${this.state.selectedApi}Request`] ? '' : 'reset'}
-									</div>
+									<div class="resetAndPresets">
+										<div
+											class="reset"
+											onClick={() => {
+												this.reset(`${this.state.selectedApi}Request`);
+											}}
+										>
+											{this.state[`${this.state.selectedApi}Request`] == defaults[`${this.state.selectedApi}Request`] ? '' : 'reset'}
+										</div>
 
-									{(currentFilterPresets || currentFacetExcludePresets || currentPresets || this.state.selectedApi === 'recommend') && (
-										<div class="presets">
-											{currentFilterPresets &&
-												currentFilterPresets.map((preset) => (
-													<button
-														type="button"
-														class={`preset ${preset.filter.background ? 'background' : ''} ${
-															this.isFilterPresetActive(preset) ? 'active' : ''
-														}`}
-														title={preset.description}
-														onClick={() => {
-															this.toggleFilterPreset(preset);
-														}}
-													>
-														{preset.filter.background && <span class="bgBadge">bg</span>}
-														{preset.label}
-													</button>
-												))}
+										{(currentFilterPresets || currentFacetExcludePresets || currentPresets || this.state.selectedApi === 'recommend') && (
+											<div class="presets">
+												{currentFilterPresets &&
+													currentFilterPresets.map((preset) => (
+														<button
+															type="button"
+															class={`preset ${preset.filter.background ? 'background' : ''} ${
+																this.isFilterPresetActive(preset) ? 'active' : ''
+															}`}
+															title={preset.description}
+															onClick={() => {
+																this.toggleFilterPreset(preset);
+															}}
+														>
+															{preset.filter.background && <span class="bgBadge">bg</span>}
+															{preset.label}
+														</button>
+													))}
 
-											{currentFacetExcludePresets &&
-												currentFacetExcludePresets.map((preset) => (
-													<button
-														type="button"
-														class={`preset exclude ${this.isFacetExcludeActive(preset) ? 'active' : ''}`}
-														title={preset.description}
-														onClick={() => {
-															this.toggleFacetExclude(preset);
-														}}
-													>
-														<span class="excludeBadge">hide</span>
-														{preset.label}
-													</button>
-												))}
+												{currentFacetExcludePresets &&
+													currentFacetExcludePresets.map((preset) => (
+														<button
+															type="button"
+															class={`preset exclude ${this.isFacetExcludeActive(preset) ? 'active' : ''}`}
+															title={preset.description}
+															onClick={() => {
+																this.toggleFacetExclude(preset);
+															}}
+														>
+															<span class="excludeBadge">hide</span>
+															{preset.label}
+														</button>
+													))}
 
-											{currentPresets &&
-												currentPresets.map((preset) => (
+												{currentPresets &&
+													currentPresets.map((preset) => (
+														<button
+															type="button"
+															class="preset"
+															title={preset.description}
+															onClick={() => {
+																this.applyPreset(`${this.state.selectedApi}Request`, preset.value);
+															}}
+														>
+															{preset.label}
+														</button>
+													))}
+
+												{this.state.selectedApi === 'recommend' && (
 													<button
 														type="button"
 														class="preset"
-														title={preset.description}
-														onClick={() => {
-															this.applyPreset(`${this.state.selectedApi}Request`, preset.value);
-														}}
+														disabled={!this.state.lastSearchResults || !this.state.lastSearchResults.length}
+														title="Fill 'product' with the first result's id from your last search/autocomplete run"
+														onClick={this.useLastResultAsProduct}
 													>
-														{preset.label}
+														Use product ID from last search
 													</button>
-												))}
-
-											{this.state.selectedApi === 'recommend' && (
-												<button
-													type="button"
-													class="preset"
-													disabled={!this.state.lastSearchResults || !this.state.lastSearchResults.length}
-													title="Fill 'product' with the first result's id from your last search/autocomplete run"
-													onClick={this.useLastResultAsProduct}
-												>
-													Use product ID from last search
-												</button>
-											)}
-										</div>
-									)}
+												)}
+											</div>
+										)}
+									</div>
 
 									<div class="grow-right">
 										<pre>

@@ -257,8 +257,8 @@ body {
 				color: $redish;
 				cursor: pointer;
 				font-weight: bold;
-				margin: 0 15px 9px;
 				text-transform: uppercase;
+				white-space: nowrap;
 
 				&:hover {
 					text-decoration: underline;
@@ -288,18 +288,24 @@ body {
 			}
 		}
 
-		.presets {
+		// Groups "reset" and the preset buttons into one flex unit that sits
+		// inline in the (wrapping) `.heading` row, right after the label/api
+		// dropdown - so presets flow in a row next to reset, and only wrap
+		// among themselves (never sharing a wrapped line with the dropdown).
+		.resetAndPresets {
 			display: flex;
 			align-items: center;
 			flex-wrap: wrap;
-			gap: 8px;
-			margin: 8px 15px 9px 0;
-			// Always its own full-width row within the (wrapping) `.heading`
-			// flex row, rather than sharing a line with the api dropdown/reset
-			// and wrapping buttons in ad-hoc, sometimes-under-the-dropdown
-			// positions.
-			flex-basis: 100%;
-			order: 5;
+			gap: 8px 15px;
+			margin-bottom: 9px;
+		}
+
+		.presets {
+			// Not a flex item in its own right - its buttons become direct
+			// flex children of `.resetAndPresets` instead, so they wrap
+			// individually right alongside "reset" rather than the whole
+			// preset group wrapping as one block below it.
+			display: contents;
 
 			.preset {
 				border: 1px solid $athosCyan;
