@@ -62,36 +62,57 @@ export const defaults = {
 	globals: JSON.stringify(globals, null, 2),
 };
 
-// Preset requests for demo purposes - one-click, known-good examples.
-// Field/value names below (tags_category: "Jackets", inventory_policy: "deny",
-// price) are verified against the atdtdp demo catalog - swap them if you point
-// this at a different site.
-export const presets = {
+// Toggleable filter presets - each is a single filter you can click on/off.
+// Presets sharing the same `group` are mutually exclusive (only one category
+// at a time); presets in different groups combine freely. Every preset and
+// every combination below is verified against the atdtdp demo catalog to
+// never return 0 results - see project memory for the full combo matrix
+// (notably: "Jackets" + the background filter DOES return 0, which is why
+// it's not in this list; Sweatshirts/Joggers/Leggings all are safe).
+export const filterPresets = {
 	searchRequest: [
 		{
+			id: 'bg-inventory-deny',
+			group: 'inventory_policy',
 			label: 'Background filter',
 			description:
 				'Silently excludes items with a "deny" inventory policy via a background filter (127 results drop to 23) without it showing up as an active facet.',
-			value: {
-				...searchRequest,
-				search: { query: { string: '' }, subQuery: '' },
-				filters: [{ field: 'inventory_policy', type: 'value', value: 'deny', background: true }],
-			},
+			filter: { field: 'inventory_policy', type: 'value', value: 'deny', background: true },
 		},
 		{
-			label: 'Category + price + sort',
-			description: 'Product-type facet (Jackets), a price range filter, and a price sort - the standard faceted search demo.',
-			value: {
-				...searchRequest,
-				search: { query: { string: '' }, subQuery: '' },
-				filters: [
-					{ field: 'tags_category', type: 'value', value: 'Jackets' },
-					{ field: 'price', type: 'range', value: { low: 20, high: 100 } },
-				],
-				sorts: [{ field: 'price', direction: 'asc' }],
-			},
+			id: 'cat-sweatshirts',
+			group: 'tags_category',
+			label: 'Category: Sweatshirts',
+			description: 'Filters to the Sweatshirts product type (23 results alone).',
+			filter: { field: 'tags_category', type: 'value', value: 'Sweatshirts' },
+		},
+		{
+			id: 'cat-joggers',
+			group: 'tags_category',
+			label: 'Category: Joggers',
+			description: 'Filters to the Joggers product type (11 results alone).',
+			filter: { field: 'tags_category', type: 'value', value: 'Joggers' },
+		},
+		{
+			id: 'cat-leggings',
+			group: 'tags_category',
+			label: 'Category: Leggings',
+			description: 'Filters to the Leggings product type (10 results alone).',
+			filter: { field: 'tags_category', type: 'value', value: 'Leggings' },
+		},
+		{
+			id: 'price-20-100',
+			group: 'price',
+			label: 'Price $20–$100',
+			description: 'Range filter on price (89 results alone).',
+			filter: { field: 'price', type: 'range', value: { low: 20, high: 100 } },
 		},
 	],
+};
+
+// Single-shot request presets that replace the whole request (used where
+// pairing doesn't make sense, e.g. autocomplete's query text).
+export const presets = {
 	autocompleteRequest: [
 		{
 			label: 'Spell correction',

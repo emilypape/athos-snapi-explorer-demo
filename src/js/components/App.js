@@ -3,7 +3,7 @@ import { Client } from '@athoscommerce/snap-client';
 import { Header } from './Header.js';
 import { ApiSelector } from './ApiSelector';
 import { Ace } from './Ace.js';
-import { defaults, presets } from '../defaults.js';
+import { defaults, presets, filterPresets } from '../defaults.js';
 
 window.Client = Client;
 const storageKey = 'athosSnapiDemoStorage';
@@ -186,6 +186,49 @@ export class App extends Component {
 		this.saveState({ [key]: JSON.stringify(value, null, 2) });
 	};
 
+	currentFilters = () => {
+		try {
+			return JSON.parse(this.state[`${this.state.selectedApi}Request`] || '{}').filters || [];
+		} catch (err) {
+			return [];
+		}
+	};
+
+	isFilterPresetActive = (preset) => {
+		return this.currentFilters().some((f) => JSON.stringify(f) === JSON.stringify(preset.filter));
+	};
+
+	// Toggles a single filter on/off. Presets sharing a `group` are mutually
+	// exclusive (selecting one replaces any other active filter in that group);
+	// presets in different groups combine, since that's the whole point of
+	// making these pairable rather than full-request swaps.
+	toggleFilterPreset = (preset) => {
+		const key = `${this.state.selectedApi}Request`;
+		let current = {};
+
+		try {
+			current = JSON.parse(this.state[key] || '{}');
+		} catch (err) {
+			current = {};
+		}
+
+		const filters = Array.isArray(current.filters) ? [...current.filters] : [];
+		const groupIndex = filters.findIndex((f) => f.field === preset.filter.field);
+		const isActive = groupIndex !== -1 && JSON.stringify(filters[groupIndex]) === JSON.stringify(preset.filter);
+
+		if (isActive) {
+			filters.splice(groupIndex, 1);
+		} else if (groupIndex !== -1) {
+			filters[groupIndex] = preset.filter;
+		} else {
+			filters.push(preset.filter);
+		}
+
+		current.filters = filters;
+
+		this.applyPreset(key, current);
+	};
+
 	useLastResultAsProduct = () => {
 		const results = this.state.lastSearchResults || [];
 
@@ -281,6 +324,7 @@ export class App extends Component {
 
 	render() {
 		const currentPresets = presets[`${this.state.selectedApi}Request`];
+		const currentFilterPresets = filterPresets[`${this.state.selectedApi}Request`];
 
 		return (
 			<div class="App">
@@ -382,44 +426,56 @@ export class App extends Component {
 										{this.state[`${this.state.selectedApi}Request`] == defaults[`${this.state.selectedApi}Request`] ? '' : 'reset'}
 									</div>
 
+									{(currentFilterPresets || currentPresets || this.state.selectedApi === 'recommend') && (
+										<div class="presets">
+											{currentFilterPresets &&
+												currentFilterPresets.map((preset) => (
+													<button
+														type="button"
+														class={`preset ${this.isFilterPresetActive(preset) ? 'active' : ''}`}
+														title={preset.description}
+														onClick={() => {
+															this.toggleFilterPreset(preset);
+														}}
+													>
+														{preset.label}
+													</button>
+												))}
+
+											{currentPresets &&
+												currentPresets.map((preset) => (
+													<button
+														type="button"
+														class="preset"
+														title={preset.description}
+														onClick={() => {
+															this.applyPreset(`${this.state.selectedApi}Request`, preset.value);
+														}}
+													>
+														{preset.label}
+													</button>
+												))}
+
+											{this.state.selectedApi === 'recommend' && (
+												<button
+													type="button"
+													class="preset"
+													disabled={!this.state.lastSearchResults || !this.state.lastSearchResults.length}
+													title="Fill 'product' with the first result's id from your last search/autocomplete run"
+													onClick={this.useLastResultAsProduct}
+												>
+													Use product ID from last search
+												</button>
+											)}
+										</div>
+									)}
+
 									<div class="grow-right">
 										<pre>
 											<span class="other">const</span> <span class="variable">requestParams</span>
 										</pre>
 									</div>
 								</div>
-
-								{(currentPresets || this.state.selectedApi === 'recommend') && (
-									<div class="presets">
-										<span class="presetsLabel">presets:</span>
-
-										{currentPresets &&
-											currentPresets.map((preset) => (
-												<button
-													type="button"
-													class="preset"
-													title={preset.description}
-													onClick={() => {
-														this.applyPreset(`${this.state.selectedApi}Request`, preset.value);
-													}}
-												>
-													{preset.label}
-												</button>
-											))}
-
-										{this.state.selectedApi === 'recommend' && (
-											<button
-												type="button"
-												class="preset"
-												disabled={!this.state.lastSearchResults || !this.state.lastSearchResults.length}
-												title="Fill 'product' with the first result's id from your last search/autocomplete run"
-												onClick={this.useLastResultAsProduct}
-											>
-												Use product ID from last search
-											</button>
-										)}
-									</div>
-								)}
 
 								<div class="ace">
 									<Ace

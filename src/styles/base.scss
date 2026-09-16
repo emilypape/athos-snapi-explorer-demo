@@ -220,6 +220,7 @@ body {
 			display: flex;
 			justify-content: flex-start;
 			align-items: flex-end;
+			flex-wrap: wrap;
 			&.lefty {
 				justify-content: left;
 			}
@@ -292,14 +293,7 @@ body {
 			align-items: center;
 			flex-wrap: wrap;
 			gap: 8px;
-			margin: 0 0 9px;
-
-			.presetsLabel {
-				font-size: 10px;
-				font-weight: bold;
-				color: $gray;
-				text-transform: uppercase;
-			}
+			margin: 0 15px 9px 0;
 
 			.preset {
 				border: 1px solid $athosCyan;
@@ -313,6 +307,11 @@ body {
 
 				&:hover {
 					background-color: color.adjust($athosCyan, $lightness: 40%);
+				}
+
+				&.active {
+					background-color: $athosCyan;
+					color: #fff;
 				}
 
 				&:disabled {
