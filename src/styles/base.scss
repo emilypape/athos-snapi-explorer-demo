@@ -437,6 +437,11 @@ body {
 					vertical-align: middle;
 					background-color: rgba(46, 204, 113, 0.45);
 					border-left: 3px solid #2ecc71;
+
+					&.new {
+						background-color: rgba(155, 89, 182, 0.35);
+						border-left-color: #9b59b6;
+					}
 				}
 			}
 		}
@@ -528,6 +533,15 @@ body {
 				position: absolute;
 				background-color: rgba(46, 204, 113, 0.25);
 				border-left: 3px solid #2ecc71;
+			}
+
+			// Highlights a TRANSFORMED-response line whose key is structure the
+			// transform newly introduces (mappings/core/attributes) - the
+			// counterpart to .rawSurvives, on the other view.
+			.transformNew {
+				position: absolute;
+				background-color: rgba(155, 89, 182, 0.2);
+				border-left: 3px solid #9b59b6;
 			}
 
 			.rawPeekOverlay {

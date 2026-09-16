@@ -13,11 +13,13 @@ export class Ace extends Component {
 	editor = null;
 
 	highlightMarkerIds = [];
+	newKeyMarkerIds = [];
 
 	onLoad = (editor) => {
 		this.editor = editor;
 		this.applyAutoFold();
 		this.applyHighlightKeys();
+		this.applyHighlightKeyNames();
 	};
 
 	componentDidUpdate(prevProps) {
@@ -29,6 +31,10 @@ export class Ace extends Component {
 
 		if (this.props.value !== prevProps.value || this.props.highlightKeys !== prevProps.highlightKeys) {
 			this.applyHighlightKeys();
+		}
+
+		if (this.props.value !== prevProps.value || this.props.highlightKeyNames !== prevProps.highlightKeyNames) {
+			this.applyHighlightKeyNames();
 		}
 	}
 
@@ -89,6 +95,38 @@ export class Ace extends Component {
 			if (match && this.props.highlightKeys[match[1]]) {
 				const id = session.addMarker(new Range(row, 0, row, 1), 'rawSurvives', 'fullLine');
 				this.highlightMarkerIds.push(id);
+			}
+		});
+	};
+
+	// When `highlightKeyNames` is set (a plain array of key names), highlights
+	// every line whose key matches, AT ANY DEPTH - unlike `highlightKeys`,
+	// which only looks at the true top level. Used on the TRANSFORMED view to
+	// show structure the transform newly introduces per result (e.g.
+	// `mappings`/`core`/`attributes`, which recur once per item in `results`
+	// and don't exist as keys anywhere in the raw result at all).
+	applyHighlightKeyNames = () => {
+		if (!this.editor) {
+			return;
+		}
+
+		const session = this.editor.getSession();
+
+		this.newKeyMarkerIds.forEach((id) => session.removeMarker(id));
+		this.newKeyMarkerIds = [];
+
+		if (!this.props.highlightKeyNames || !this.props.highlightKeyNames.length) {
+			return;
+		}
+
+		const { Range } = ace.require('ace/range');
+		const pattern = new RegExp(`^\\s*"(${this.props.highlightKeyNames.join('|')})":`);
+		const lines = (this.props.value || '').split('\n');
+
+		lines.forEach((line, row) => {
+			if (pattern.test(line)) {
+				const id = session.addMarker(new Range(row, 0, row, 1), 'transformNew', 'fullLine');
+				this.newKeyMarkerIds.push(id);
 			}
 		});
 	};

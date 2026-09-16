@@ -3,7 +3,7 @@ import { Client } from '@athoscommerce/snap-client';
 import { Header } from './Header.js';
 import { ApiSelector } from './ApiSelector';
 import { Ace } from './Ace.js';
-import { defaults, presets, filterPresets, globalsPresets, facetExcludePresets, rawToTransformedKeyMap } from '../defaults.js';
+import { defaults, presets, filterPresets, globalsPresets, facetExcludePresets, rawToTransformedKeyMap, transformedNewKeys } from '../defaults.js';
 
 window.Client = Client;
 const storageKey = 'athosSnapiDemoStorage';
@@ -723,6 +723,13 @@ export class App extends Component {
 												survives into the transformed response - everything else at the top level is dropped by the transform
 											</span>
 										)}
+
+										{!this.state.showRawResponse && (
+											<span class="rawLegend">
+												<span class="rawLegendSwatch new"></span>
+												new structure the transform adds per result (not present anywhere in the raw result)
+											</span>
+										)}
 									</div>
 
 									<div class="grow-right">
@@ -741,6 +748,7 @@ export class App extends Component {
 										dark={this.state.showRawResponse}
 										autoFoldExcept={['results']}
 										highlightKeys={this.state.showRawResponse ? currentHighlightMap : null}
+										highlightKeyNames={!this.state.showRawResponse ? transformedNewKeys : null}
 									/>
 
 									{this.state.peekRaw && !this.state.showRawResponse && (

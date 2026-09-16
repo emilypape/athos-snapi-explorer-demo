@@ -231,3 +231,14 @@ export const rawToTransformedKeyMap = {
 // afterward as `autocomplete`) isn't covered, since we don't capture its raw
 // payload separately.
 rawToTransformedKeyMap.autocomplete = rawToTransformedKeyMap.search;
+
+// Counterpart to rawToTransformedKeyMap, for the TRANSFORMED view: key names
+// the transform newly introduces per result item, verified live against a
+// real result - the raw result is ~40 flat fields (name, price, vendor,
+// category, ... plus id/uid), and none of them are named "mappings",
+// "attributes", or "core". The transform buckets the ~20 known/core fields
+// under mappings.core and everything else under attributes - both container
+// keys are pure transform output, not renamed/passthrough raw fields.
+// Recurs once per item in `results`, so highlighting matches by key name at
+// any depth rather than only the true top level.
+export const transformedNewKeys = ['mappings', 'attributes', 'core'];
