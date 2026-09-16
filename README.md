@@ -7,6 +7,8 @@ This fork adds:
 - **Show Raw Response** - toggles the response panel between the SDK's transformed result and the untouched API payload, so you can show clients exactly what the transform layer does. Hover the 👁 icon for a quick peek overlay without leaving the transformed view.
 - **Recommendations tab** - demos `client.recommend({ tag, product, ... })` alongside search/autocomplete. Use the "Use product ID from last search" preset to pull a real product id out of your last search run.
 - **Pairable filter presets** - toggleable one-click filter chips (next to "reset") instead of typing JSON. Presets for the same facet (e.g. the category options) are mutually exclusive; presets for different facets combine freely (e.g. background filter + a category + a price range, all at once). Autocomplete keeps a single "Spell correction" preset since query text isn't something you pair.
+- **Globals-level background filter** - a toggleable preset in the `globals` panel itself (per the snap-client docs' "Global Config" pattern), which is concatenated onto *every* request the client makes, not just one. Requires re-instantiating, same as any other globals edit.
+- Presets that are true background filters (`background: true` - a silent, server-side `bgfilter.*` param that never shows up as an active/customer-visible filter) are tagged with a dashed orange **bg** badge, so they're never confused with the plain, customer-visible filter presets (category, price).
 
 Create an instance of the client with a `siteId`, edit the request params for `search`, `autocomplete`, or `recommend`, and view the raw + transformed `search`/`meta` responses.
 
