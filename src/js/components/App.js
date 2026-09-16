@@ -815,12 +815,6 @@ export class App extends Component {
 											</span>
 										)}
 
-										{!this.state.showRawResponse && (
-											<span class="rawLegend">
-												<span class="rawLegendSwatch"></span>
-												new structure the transform adds per result (not present anywhere in the raw result)
-											</span>
-										)}
 									</div>
 
 									<div class="grow-right">

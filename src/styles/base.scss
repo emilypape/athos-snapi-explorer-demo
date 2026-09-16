@@ -422,9 +422,8 @@ body {
 
 		// Not a flex item in its own right - its children become direct flex
 		// children of `.heading` itself (which already has its own gap/wrap),
-		// so the toggle button sits right next to the response label and only
-		// the longer bits (the legend text) wrap onto their own line, instead
-		// of the whole group wrapping below the label as one block.
+		// so the toggle button and peek icon sit right next to the response
+		// label instead of the whole group wrapping below it as one block.
 		.rawControls {
 			display: contents;
 
@@ -456,21 +455,6 @@ body {
 
 				&:hover {
 					filter: none;
-				}
-			}
-
-			.rawLegend {
-				font-size: 10px;
-				color: $gray;
-
-				.rawLegendSwatch {
-					display: inline-block;
-					width: 10px;
-					height: 10px;
-					margin-right: 5px;
-					vertical-align: middle;
-					background-color: rgba(155, 89, 182, 0.35);
-					border-left: 3px solid #9b59b6;
 				}
 			}
 		}
