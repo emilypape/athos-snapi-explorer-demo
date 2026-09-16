@@ -293,7 +293,13 @@ body {
 			align-items: center;
 			flex-wrap: wrap;
 			gap: 8px;
-			margin: 0 15px 9px 0;
+			margin: 8px 15px 9px 0;
+			// Always its own full-width row within the (wrapping) `.heading`
+			// flex row, rather than sharing a line with the api dropdown/reset
+			// and wrapping buttons in ad-hoc, sometimes-under-the-dropdown
+			// positions.
+			flex-basis: 100%;
+			order: 5;
 
 			.preset {
 				border: 1px solid $athosCyan;
@@ -329,6 +335,33 @@ body {
 					}
 
 					.bgBadge {
+						display: inline-block;
+						font-size: 8px;
+						font-weight: bold;
+						letter-spacing: 0.5px;
+						border: 1px solid currentColor;
+						border-radius: 2px;
+						padding: 0 3px;
+						margin-right: 5px;
+						vertical-align: middle;
+					}
+				}
+
+				&.exclude {
+					border-style: dotted;
+					border-color: $gray;
+					color: $gray;
+
+					&:hover {
+						background-color: color.adjust($gray, $lightness: 55%);
+					}
+
+					&.active {
+						background-color: $gray;
+						color: #fff;
+					}
+
+					.excludeBadge {
 						display: inline-block;
 						font-size: 8px;
 						font-weight: bold;

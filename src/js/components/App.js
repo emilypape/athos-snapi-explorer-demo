@@ -3,7 +3,7 @@ import { Client } from '@athoscommerce/snap-client';
 import { Header } from './Header.js';
 import { ApiSelector } from './ApiSelector';
 import { Ace } from './Ace.js';
-import { defaults, presets, filterPresets, globalsPresets } from '../defaults.js';
+import { defaults, presets, filterPresets, globalsPresets, facetExcludePresets } from '../defaults.js';
 
 window.Client = Client;
 const storageKey = 'athosSnapiDemoStorage';
@@ -247,6 +247,47 @@ export class App extends Component {
 	isFilterPresetActive = (preset) => this.isFilterPresetActiveIn(`${this.state.selectedApi}Request`, preset);
 	toggleFilterPreset = (preset) => this.toggleFilterPresetIn(`${this.state.selectedApi}Request`, preset);
 
+	// Toggleable `facets.exclude` entries - a request-level list of facet
+	// field names to omit from the response entirely (distinct from
+	// filtering: it never changes results/count, only which facets come
+	// back). One value can be on/off independently of any other.
+	isFacetExcludeActive = (preset) => {
+		let current = {};
+
+		try {
+			current = JSON.parse(this.state[`${this.state.selectedApi}Request`] || '{}');
+		} catch (err) {
+			current = {};
+		}
+
+		return Array.isArray(current.facets?.exclude) && current.facets.exclude.includes(preset.value);
+	};
+
+	toggleFacetExclude = (preset) => {
+		const key = `${this.state.selectedApi}Request`;
+		let current = {};
+
+		try {
+			current = JSON.parse(this.state[key] || '{}');
+		} catch (err) {
+			current = {};
+		}
+
+		current.facets = current.facets || {};
+		const exclude = Array.isArray(current.facets.exclude) ? [...current.facets.exclude] : [];
+		const idx = exclude.indexOf(preset.value);
+
+		if (idx !== -1) {
+			exclude.splice(idx, 1);
+		} else {
+			exclude.push(preset.value);
+		}
+
+		current.facets.exclude = exclude;
+
+		this.applyPreset(key, current);
+	};
+
 	isGlobalsFilterPresetActive = (preset) => this.isFilterPresetActiveIn('globals', preset);
 	toggleGlobalsFilterPreset = (preset) => this.toggleFilterPresetIn('globals', preset, { reinstantiate: true });
 
@@ -408,6 +449,7 @@ export class App extends Component {
 	render() {
 		const currentPresets = presets[`${this.state.selectedApi}Request`];
 		const currentFilterPresets = filterPresets[`${this.state.selectedApi}Request`];
+		const currentFacetExcludePresets = facetExcludePresets[`${this.state.selectedApi}Request`];
 
 		return (
 			<div class="App">
@@ -542,7 +584,7 @@ export class App extends Component {
 										{this.state[`${this.state.selectedApi}Request`] == defaults[`${this.state.selectedApi}Request`] ? '' : 'reset'}
 									</div>
 
-									{(currentFilterPresets || currentPresets || this.state.selectedApi === 'recommend') && (
+									{(currentFilterPresets || currentFacetExcludePresets || currentPresets || this.state.selectedApi === 'recommend') && (
 										<div class="presets">
 											{currentFilterPresets &&
 												currentFilterPresets.map((preset) => (
@@ -557,6 +599,21 @@ export class App extends Component {
 														}}
 													>
 														{preset.filter.background && <span class="bgBadge">bg</span>}
+														{preset.label}
+													</button>
+												))}
+
+											{currentFacetExcludePresets &&
+												currentFacetExcludePresets.map((preset) => (
+													<button
+														type="button"
+														class={`preset exclude ${this.isFacetExcludeActive(preset) ? 'active' : ''}`}
+														title={preset.description}
+														onClick={() => {
+															this.toggleFacetExclude(preset);
+														}}
+													>
+														<span class="excludeBadge">hide</span>
 														{preset.label}
 													</button>
 												))}

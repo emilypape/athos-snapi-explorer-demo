@@ -47,7 +47,10 @@ const autocompleteRequest = {
 
 const recommendRequest = {
 	tag: 'similar',
-	product: '',
+	// A known-good product id on atdtdp, verified to return real "similar"
+	// results (8 items) - so the Recommendations tab works out of the box
+	// with zero prior steps, not just via "Use product ID from last search".
+	product: '52079573827950',
 	limit: 10,
 };
 
@@ -86,9 +89,15 @@ export const filterPresets = {
 		{
 			id: 'global-bg-vendor',
 			group: 'vendor',
-			label: 'Background filter: VersaWearCo only',
+			// Labeled "Brand" for the demo narrative - but the field MUST stay
+			// `vendor`. Tested live: `field: 'brand'` doesn't error, it just
+			// silently returns the full unfiltered count (127), identical to a
+			// made-up field name - `brand` only exists as a display-only field
+			// on results (mappings.core.brand), it isn't actually indexed as a
+			// filterable facet on this catalog. `vendor` is the real one.
+			label: 'Background filter: Brand (VersaWearCo)',
 			description:
-				'Adds a background filter (vendor: VersaWearCo) to the client globals, so every request made with this client is silently scoped to that vendor - not just the current one. Requires re-instantiating the client.',
+				'Adds a background filter to the client globals, so every request made with this client is silently scoped to that brand - not just the current one. Requires re-instantiating the client. Note: the underlying indexed field on this catalog is "vendor", not "brand" - "brand" exists on results for display but isn’t filterable, so it silently no-ops if used as the filter field.',
 			filter: { field: 'vendor', type: 'value', value: 'VersaWearCo', background: true },
 		},
 	],
@@ -132,6 +141,36 @@ export const filterPresets = {
 	],
 };
 
+// Autocomplete requests accept the exact same `filters` shape as search, and
+// every one of the search-tab combinations above is verified to also work
+// through `client.autocomplete()` when paired with a real query string (e.g.
+// via the "Spell correction" or "Prefix completion" preset below, or just
+// typing something first) - autocomplete throws if the query is empty, so a
+// bare filter toggle alone isn't enough to run it.
+filterPresets.autocompleteRequest = filterPresets.searchRequest;
+
+// Toggleable `facets.exclude` presets - adds/removes a facet from the ones
+// the API even bothers returning, distinct from filtering: results/count are
+// completely unaffected, only which facets come back. Verified live:
+// excluding "color" and "vendor" removes them from `search.facets` while
+// totalResults stays at 127 either way.
+export const facetExcludePresets = {
+	searchRequest: [
+		{
+			id: 'exclude-color',
+			label: 'Exclude facet: Color',
+			description: 'Adds "color" to facets.exclude - it’s omitted from the response entirely (not just hidden/collapsed); results are unaffected.',
+			value: 'color',
+		},
+		{
+			id: 'exclude-vendor',
+			label: 'Exclude facet: Vendor',
+			description: 'Adds "vendor" to facets.exclude - useful for hiding a facet from nav/merchandising without touching filtering; results are unaffected.',
+			value: 'vendor',
+		},
+	],
+};
+
 // Non-filter globals presets - these patch/remove a whole top-level key on
 // `globals` rather than toggling one entry in a `filters` array. Verified:
 // a request's OWN `pagination` always wins over the global default (that's
@@ -164,6 +203,14 @@ export const presets = {
 			value: {
 				...autocompleteRequest,
 				search: { query: { string: 'jaket', spellCorrection: true }, subQuery: '' },
+			},
+		},
+		{
+			label: 'Prefix completion',
+			description: 'A short prefix ("leg") that completes to a full term ("legging") as you type - shows suggestion type "completed" vs. the spell-correction example’s "exact".',
+			value: {
+				...autocompleteRequest,
+				search: { query: { string: 'leg', spellCorrection: true }, subQuery: '' },
 			},
 		},
 	],
