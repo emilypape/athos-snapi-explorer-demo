@@ -289,26 +289,17 @@ body {
 			}
 		}
 
-		// Not a flex item in its own right - "reset" and the preset buttons
-		// become direct children of `.heading`'s own flex-wrap row instead, so
-		// they flow beside the api dropdown itself, and only the overflow
-		// (whichever buttons don't fit) wraps to the next line - rather than
-		// the whole reset+presets group wrapping below the dropdown as one
-		// block.
-		.resetAndPresets {
-			display: contents;
-		}
-
-		.presets {
-			// Not a flex item in its own right - combined with `.resetAndPresets`
-			// also being `display: contents`, its buttons end up as direct flex
-			// children of `.heading` itself, alongside the api dropdown and
-			// "reset" - so they wrap individually beside the dropdown rather
-			// than as one block below it. (Tried a self-contained, right-aligned
-			// version of this group instead - a nested flex container can't
-			// partially share a line with siblings, so it always dropped to its
-			// own row below the dropdown; reverted in favor of staying beside it.)
-			display: contents;
+		// Its own dedicated row, above `.heading` (the dropdown/reset/code-
+		// sample row) - so a long list of preset buttons never competes with,
+		// or gets squeezed beside, the api dropdown and "reset". Free to
+		// wrap and/or right-align on its own terms since it's not sharing a
+		// flex line with anything else.
+		.presetsRow {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			gap: 8px;
+			margin-bottom: 9px;
 
 			.preset {
 				border: 1px solid $athosCyan;
