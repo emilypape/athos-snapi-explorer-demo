@@ -314,6 +314,33 @@ body {
 					color: #fff;
 				}
 
+				&.background {
+					border-style: dashed;
+					border-color: $orangey;
+					color: $orangey;
+
+					&:hover {
+						background-color: color.adjust($orangey, $lightness: 44%);
+					}
+
+					&.active {
+						background-color: $orangey;
+						color: #fff;
+					}
+
+					.bgBadge {
+						display: inline-block;
+						font-size: 8px;
+						font-weight: bold;
+						letter-spacing: 0.5px;
+						border: 1px solid currentColor;
+						border-radius: 2px;
+						padding: 0 3px;
+						margin-right: 5px;
+						vertical-align: middle;
+					}
+				}
+
 				&:disabled {
 					opacity: 0.4;
 					cursor: not-allowed;

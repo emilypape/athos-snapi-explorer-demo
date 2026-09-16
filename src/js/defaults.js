@@ -69,7 +69,29 @@ export const defaults = {
 // never return 0 results - see project memory for the full combo matrix
 // (notably: "Jackets" + the background filter DOES return 0, which is why
 // it's not in this list; Sweatshirts/Joggers/Leggings all are safe).
+//
+// `filter.background: true` marks a REAL background filter (server param
+// `bgfilter.*` - silently narrows results, never appears in the transformed
+// `search.filters`/facet-active state). Everything else here is a plain,
+// customer-visible `filter.*` - the UI tags background ones distinctly so
+// the two are never confused. See docs/Libraries/library-snap-client.md
+// ("Global Config") and reference/Search/search-result-pages.md
+// ("Background Filters") in the Athos docs.
 export const filterPresets = {
+	// Applied to the Client's `globals`, so it's concatenated onto EVERY
+	// request made with this client (search, autocomplete, category, finder) -
+	// not just the current one. This is the documented "global background
+	// filter" pattern, e.g. scoping an entire storefront to one vendor/brand.
+	globals: [
+		{
+			id: 'global-bg-vendor',
+			group: 'vendor',
+			label: 'Background filter: VersaWearCo only',
+			description:
+				'Adds a background filter (vendor: VersaWearCo) to the client globals, so every request made with this client is silently scoped to that vendor - not just the current one. Requires re-instantiating the client.',
+			filter: { field: 'vendor', type: 'value', value: 'VersaWearCo', background: true },
+		},
+	],
 	searchRequest: [
 		{
 			id: 'bg-inventory-deny',

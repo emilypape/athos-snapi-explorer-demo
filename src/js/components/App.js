@@ -186,24 +186,27 @@ export class App extends Component {
 		this.saveState({ [key]: JSON.stringify(value, null, 2) });
 	};
 
-	currentFilters = () => {
+	filtersIn = (key) => {
 		try {
-			return JSON.parse(this.state[`${this.state.selectedApi}Request`] || '{}').filters || [];
+			return JSON.parse(this.state[key] || '{}').filters || [];
 		} catch (err) {
 			return [];
 		}
 	};
 
-	isFilterPresetActive = (preset) => {
-		return this.currentFilters().some((f) => JSON.stringify(f) === JSON.stringify(preset.filter));
+	isFilterPresetActiveIn = (key, preset) => {
+		return this.filtersIn(key).some((f) => JSON.stringify(f) === JSON.stringify(preset.filter));
 	};
 
-	// Toggles a single filter on/off. Presets sharing a `group` are mutually
-	// exclusive (selecting one replaces any other active filter in that group);
-	// presets in different groups combine, since that's the whole point of
-	// making these pairable rather than full-request swaps.
-	toggleFilterPreset = (preset) => {
-		const key = `${this.state.selectedApi}Request`;
+	// Toggles a single filter on/off within whichever JSON-string state field
+	// `key` names (a request body, or `globals`). Presets sharing a `group`
+	// are mutually exclusive (selecting one replaces any other active filter
+	// in that group); presets in different groups combine, since that's the
+	// whole point of making these pairable rather than full-request swaps.
+	// `reinstantiate: true` routes the change through `globalsChanged` instead
+	// of a plain state update, so editing globals still requires clicking the
+	// re-instantiate control - same as hand-editing the globals JSON.
+	toggleFilterPresetIn = (key, preset, { reinstantiate } = {}) => {
 		let current = {};
 
 		try {
@@ -226,8 +229,20 @@ export class App extends Component {
 
 		current.filters = filters;
 
-		this.applyPreset(key, current);
+		const value = JSON.stringify(current, null, 2);
+
+		if (reinstantiate) {
+			this.globalsChanged(value);
+		} else {
+			this.applyPreset(key, current);
+		}
 	};
+
+	isFilterPresetActive = (preset) => this.isFilterPresetActiveIn(`${this.state.selectedApi}Request`, preset);
+	toggleFilterPreset = (preset) => this.toggleFilterPresetIn(`${this.state.selectedApi}Request`, preset);
+
+	isGlobalsFilterPresetActive = (preset) => this.isFilterPresetActiveIn('globals', preset);
+	toggleGlobalsFilterPreset = (preset) => this.toggleFilterPresetIn('globals', preset, { reinstantiate: true });
 
 	useLastResultAsProduct = () => {
 		const results = this.state.lastSearchResults || [];
@@ -357,6 +372,26 @@ export class App extends Component {
 										{this.state.globals == defaults.globals ? '' : 'reset'}
 									</span>
 
+									{filterPresets.globals && (
+										<div class="presets">
+											{filterPresets.globals.map((preset) => (
+												<button
+													type="button"
+													class={`preset ${preset.filter.background ? 'background' : ''} ${
+														this.isGlobalsFilterPresetActive(preset) ? 'active' : ''
+													}`}
+													title={preset.description}
+													onClick={() => {
+														this.toggleGlobalsFilterPreset(preset);
+													}}
+												>
+													{preset.filter.background && <span class="bgBadge">bg</span>}
+													{preset.label}
+												</button>
+											))}
+										</div>
+									)}
+
 									<div class="grow-right">
 										<pre>
 											<span class="other">const</span> <span class="variable">client</span> = <span class="reserved">new</span> Client(
@@ -432,12 +467,15 @@ export class App extends Component {
 												currentFilterPresets.map((preset) => (
 													<button
 														type="button"
-														class={`preset ${this.isFilterPresetActive(preset) ? 'active' : ''}`}
+														class={`preset ${preset.filter.background ? 'background' : ''} ${
+															this.isFilterPresetActive(preset) ? 'active' : ''
+														}`}
 														title={preset.description}
 														onClick={() => {
 															this.toggleFilterPreset(preset);
 														}}
 													>
+														{preset.filter.background && <span class="bgBadge">bg</span>}
 														{preset.label}
 													</button>
 												))}
