@@ -132,6 +132,28 @@ export const filterPresets = {
 	],
 };
 
+// Non-filter globals presets - these patch/remove a whole top-level key on
+// `globals` rather than toggling one entry in a `filters` array. Verified:
+// a request's OWN `pagination` always wins over the global default (that's
+// deepmerge(globals, params) - params is the override), so this only has a
+// visible effect once the search/autocomplete request stops specifying its
+// own pagination - which is exactly what toggling this preset also does to
+// both request tabs, so the effect is immediately visible rather than
+// silently doing nothing. Mirrors the documented pattern of setting
+// `globals: { pagination: { pageSize: 6 } }` once per controller instead of
+// per-request (see docs/BUILD_DEPLOY_INTEGRATION_MAGENTO2.md, autocomplete
+// controller config).
+export const globalsPresets = [
+	{
+		id: 'global-pagination-6',
+		group: 'pagination',
+		label: 'Global pagination: 6/page',
+		description:
+			'Sets pageSize to 6 in the client globals as the default for every request - clears pagination from the search/autocomplete requests so the global default actually applies (a request’s own pagination always overrides the global one). Requires re-instantiating.',
+		patch: { pagination: { pageSize: 6 } },
+	},
+];
+
 // Single-shot request presets that replace the whole request (used where
 // pairing doesn't make sense, e.g. autocomplete's query text).
 export const presets = {

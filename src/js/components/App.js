@@ -3,7 +3,7 @@ import { Client } from '@athoscommerce/snap-client';
 import { Header } from './Header.js';
 import { ApiSelector } from './ApiSelector';
 import { Ace } from './Ace.js';
-import { defaults, presets, filterPresets } from '../defaults.js';
+import { defaults, presets, filterPresets, globalsPresets } from '../defaults.js';
 
 window.Client = Client;
 const storageKey = 'athosSnapiDemoStorage';
@@ -23,6 +23,7 @@ export class App extends Component {
 			response: undefined,
 			meta: undefined,
 			rawResponse: undefined,
+			rawMeta: undefined,
 			showRawResponse: false,
 			peekRaw: false,
 			lastSearchResults: [],
@@ -72,9 +73,12 @@ export class App extends Component {
 
 	// Wraps each requester's low-level `request()` so we can capture the exact
 	// pre-transform JSON payload the API returned, alongside the SDK's
-	// normal (transformed) result - used to power "Show Raw Response".
+	// normal (transformed) result - used to power "Show Raw Response". `meta`
+	// is captured separately from `search`/`recommend` so the meta panel can
+	// flip to its own raw payload independently (they're two different API
+	// calls, not one response split in two).
 	wrapRawCapture = (client) => {
-		const captureFor = (requester, matchMethod) => {
+		const captureFor = (requester, { matchMethod, target } = {}) => {
 			if (!requester || requester.__rawCaptureWrapped) {
 				return;
 			}
@@ -85,7 +89,7 @@ export class App extends Component {
 				const raw = await original(context, cacheKey);
 
 				if (!matchMethod || context.method === matchMethod) {
-					this.lastRawResponse = raw;
+					this[target] = raw;
 				}
 
 				return raw;
@@ -94,10 +98,11 @@ export class App extends Component {
 			requester.__rawCaptureWrapped = true;
 		};
 
-		captureFor(client.requesters.search);
+		captureFor(client.requesters.search, { target: 'lastRawResponse' });
 		// recommend fires a GET /profile and a POST /recommend per call - we only
 		// want the recommend response, not the profile lookup.
-		captureFor(client.requesters.recommend, 'POST');
+		captureFor(client.requesters.recommend, { matchMethod: 'POST', target: 'lastRawResponse' });
+		captureFor(client.requesters.meta, { target: 'lastRawMeta' });
 	};
 
 	instantiateClient = async () => {
@@ -119,6 +124,7 @@ export class App extends Component {
 				response: '',
 				meta: '',
 				rawResponse: '',
+				rawMeta: '',
 				showInstantiatedMessage: true,
 				instantiatedGlobals: this.state.globals,
 				clientReinstantiate: false,
@@ -244,6 +250,65 @@ export class App extends Component {
 	isGlobalsFilterPresetActive = (preset) => this.isFilterPresetActiveIn('globals', preset);
 	toggleGlobalsFilterPreset = (preset) => this.toggleFilterPresetIn('globals', preset, { reinstantiate: true });
 
+	// Non-filter globals presets: patches (or removes) one whole top-level key
+	// on `globals`, e.g. `pagination`. Unlike a filter, there's nothing to
+	// merge - the preset's value either fully replaces that key or is absent.
+	isGlobalsPresetActive = (preset) => {
+		let current = {};
+
+		try {
+			current = JSON.parse(this.state.globals || '{}');
+		} catch (err) {
+			current = {};
+		}
+
+		return JSON.stringify(current[preset.group]) === JSON.stringify(preset.patch[preset.group]);
+	};
+
+	toggleGlobalsPreset = (preset) => {
+		let current = {};
+
+		try {
+			current = JSON.parse(this.state.globals || '{}');
+		} catch (err) {
+			current = {};
+		}
+
+		const activating = !this.isGlobalsPresetActive(preset);
+
+		if (activating) {
+			current[preset.group] = preset.patch[preset.group];
+		} else {
+			delete current[preset.group];
+		}
+
+		this.globalsChanged(JSON.stringify(current, null, 2));
+
+		// A request's own `pagination` always wins over the global default
+		// (deepmerge(globals, params) - params is the override), so clear/
+		// restore it on both request tabs too, or toggling this would appear
+		// to do nothing.
+		if (preset.group === 'pagination') {
+			['searchRequest', 'autocompleteRequest'].forEach((key) => {
+				let requestObj = {};
+
+				try {
+					requestObj = JSON.parse(this.state[key] || '{}');
+				} catch (err) {
+					requestObj = {};
+				}
+
+				if (activating) {
+					delete requestObj.pagination;
+				} else {
+					requestObj.pagination = JSON.parse(defaults[key]).pagination;
+				}
+
+				this.saveState({ [key]: JSON.stringify(requestObj, null, 2) });
+			});
+		}
+	};
+
 	useLastResultAsProduct = () => {
 		const results = this.state.lastSearchResults || [];
 
@@ -293,6 +358,7 @@ export class App extends Component {
 		}
 
 		this.lastRawResponse = undefined;
+		this.lastRawMeta = undefined;
 
 		try {
 			if (this.state.selectedApi === 'recommend') {
@@ -302,6 +368,7 @@ export class App extends Component {
 					response: JSON.stringify(rest, null, 2),
 					meta: JSON.stringify(meta, null, 2),
 					rawResponse: JSON.stringify(this.lastRawResponse, null, 2),
+					rawMeta: JSON.stringify(this.lastRawMeta, null, 2),
 				});
 			} else {
 				const { meta, search } = await this.client[api.function](request);
@@ -310,6 +377,7 @@ export class App extends Component {
 					response: JSON.stringify(search, null, 2),
 					meta: JSON.stringify(meta, null, 2),
 					rawResponse: JSON.stringify(this.lastRawResponse, null, 2),
+					rawMeta: JSON.stringify(this.lastRawMeta, null, 2),
 				};
 
 				if (search && Array.isArray(search.results)) {
@@ -372,7 +440,7 @@ export class App extends Component {
 										{this.state.globals == defaults.globals ? '' : 'reset'}
 									</span>
 
-									{filterPresets.globals && (
+									{(filterPresets.globals || globalsPresets) && (
 										<div class="presets">
 											{filterPresets.globals.map((preset) => (
 												<button
@@ -386,6 +454,19 @@ export class App extends Component {
 													}}
 												>
 													{preset.filter.background && <span class="bgBadge">bg</span>}
+													{preset.label}
+												</button>
+											))}
+
+											{globalsPresets.map((preset) => (
+												<button
+													type="button"
+													class={`preset ${this.isGlobalsPresetActive(preset) ? 'active' : ''}`}
+													title={preset.description}
+													onClick={() => {
+														this.toggleGlobalsPreset(preset);
+													}}
+												>
 													{preset.label}
 												</button>
 											))}
@@ -589,12 +670,13 @@ export class App extends Component {
 										value={this.state.showRawResponse ? this.state.rawResponse : this.state.response}
 										readOnly={true}
 										dark={this.state.showRawResponse}
+										autoFoldExcept={['results']}
 									/>
 
 									{this.state.peekRaw && !this.state.showRawResponse && (
 										<div class="rawPeekOverlay">
 											<div class="rawPeekLabel">raw response</div>
-											<Ace value={this.state.rawResponse} readOnly={true} dark={true} />
+											<Ace value={this.state.rawResponse} readOnly={true} dark={true} autoFoldExcept={['results']} />
 										</div>
 									)}
 								</div>
@@ -615,8 +697,12 @@ export class App extends Component {
 									<div class="grow-right"></div>
 								</div>
 
-								<div class="ace">
-									<Ace value={this.state.meta} readOnly={true} />
+								<div class={`ace ${this.state.showRawResponse ? 'dark' : ''}`}>
+									<Ace
+										value={this.state.showRawResponse ? this.state.rawMeta : this.state.meta}
+										readOnly={true}
+										dark={this.state.showRawResponse}
+									/>
 								</div>
 							</div>
 						</div>
